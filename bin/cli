@@ -1,0 +1,34 @@
+#!/usr/bin/env node
+
+'use strict';
+const prog = require('caporal');
+const pkg = require('../package');
+const { resolve } = require('path');
+
+prog
+    .version(pkg.version)
+    .description('Process manager utility.')
+    // 'app' is required, 'env' is optional
+    .command('start', 'Start a worker')
+    .help('Worker should be a module that exports a shutdown and a start functions')
+    .argument('<worker>', 'Worker script')
+    .option('-m, --all-cores', 'Use all available cores', prog.BOOL, false)
+    .option('-t, --total <instances>', 'Number of worker instances to start', prog.INT, 1)
+    .action(function(args, options, logger) {
+
+        let { worker } = args;
+        let { total: instances, allCores } = options;
+
+        worker = resolve(worker);
+
+        if (allCores) instances = require('os').cpus().length;
+
+        require('../lib/cli').run({
+            logger,
+            worker,
+            instances,
+        });
+    });
+
+
+prog.parse(process.argv);
