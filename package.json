@@ -1,6 +1,6 @@
 {
   "name": "simple-process-manager",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Simple process manager",
   "main": "index.js",
   "scripts": {
