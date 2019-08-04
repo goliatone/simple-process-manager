@@ -19,7 +19,6 @@ if (cluster.isMaster) {
 
     ProcessManager.worker.start({ shutdown: server.close }).then(function $ready() {
         server.start();
-        process.send({ msg: `child ${process.pid}: listening on 3999` });
     });
 }
 
