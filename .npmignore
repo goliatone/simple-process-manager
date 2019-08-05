@@ -1,0 +1,5 @@
+.jshintrc
+.npmrc
+load.txt
+taskfile
+example/*
