@@ -30,7 +30,7 @@ server.on('connection', function $onConnection(socket) {
 });
 
 module.exports = {
-    start(config) {
+    start(config = {}) {
         if (config.logger) logger = config.logger;
 
         logger.info('------------- CHILD PROCESS ---------');
