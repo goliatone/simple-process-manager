@@ -18,7 +18,9 @@ if (cluster.isMaster) {
     console.log('child: process', process.pid);
 
     ProcessManager.worker.start({ shutdown: server.close }).then(function $ready() {
-        server.start();
+        server.start({
+            logger: console
+        });
     });
 }
 
