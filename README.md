@@ -82,6 +82,7 @@ $ kill -SIGINT <pid>
 
 ## Changelog
 
+* 2019-09-01 v0.4.2 Bug fixes
 * 2019-09-01 v0.4.0 Added CLI commands to manage metadata and restart workers
 * 2019-08-31 v0.3.0 Enable restarting workers using `SIGUSR2` signal
 * 2019-08-04 v0.2.0 Clean up, promisify, and expose CLI
