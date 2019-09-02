@@ -16,7 +16,7 @@ prog
     .command('start', 'Start a worker')
     .help('Worker should be a module that exports a shutdown and a start functions')
     .argument('<worker>', 'Worker script')
-    .option('-n, -name', 'Worker name', prog.STRING)
+    .option('-n, --name <name>', 'Worker name', prog.STRING)
     .option('-m, --all-cores', 'Use all available cores', prog.BOOL, false)
     .option('-t, --total <instances>', 'Number of worker instances to start', prog.INT, 1)
     .action(function(args, options, logger) {
