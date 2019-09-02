@@ -1,9 +1,13 @@
 #!/usr/bin/env node
 
 'use strict';
+const os = require('os');
 const prog = require('caporal');
 const pkg = require('../package');
+const cli = require('../lib/cli');
 const { resolve } = require('path');
+const { spawn } = require('child_process');
+const Metadata = require('../lib/metadata');
 
 prog
     .version(pkg.version)
@@ -12,6 +16,7 @@ prog
     .command('start', 'Start a worker')
     .help('Worker should be a module that exports a shutdown and a start functions')
     .argument('<worker>', 'Worker script')
+    .option('-n, -name', 'Worker name', prog.STRING)
     .option('-m, --all-cores', 'Use all available cores', prog.BOOL, false)
     .option('-t, --total <instances>', 'Number of worker instances to start', prog.INT, 1)
     .action(function(args, options, logger) {
@@ -19,16 +24,92 @@ prog
         let { worker } = args;
         let { total: instances, allCores } = options;
 
+        if (!options.name) {
+            options.name = getNameFromWorker(worker);
+        }
+
+        let name = options.name;
+
+        //Save worker metadata
+        // {instances, name}
+
+        // process.title = process.argv[1] + ' ' + options.name;
+
         worker = resolve(worker);
 
-        if (allCores) instances = require('os').cpus().length;
+        if (allCores) instances = os.cpus().length;
 
-        require('../lib/cli').run({
+        cli.run({
+            name,
             logger,
             worker,
             instances,
         });
+    })
+    .command('list', 'List active workers')
+    .help('This command will show a list of all workers currently running and some metadata for each')
+    .option('-j, --json', 'Return as JSON', prog.BOOL, false)
+    .action(async function(args, options, logger) {
+
+        const metadata = new Metadata({
+            logger,
+        });
+
+        await metadata.load();
+
+        if (options.json) {
+            return console.log(JSON.stringify(metadata.meta));
+        }
+
+        metadata.forEach(info => {
+            logger.info(info);
+        });
+    })
+    .command('info', 'Get worker info')
+    .help('This command will show details for a given currently running worker')
+    .argument('<name>', 'Worker name')
+    .option('-j, --json', 'Return as JSON', prog.BOOL, false)
+    .action(async function(args, options, logger) {
+
+        const metadata = new Metadata({
+            logger
+        });
+
+        await metadata.load();
+
+        const info = metadata.get(args.name);
+
+        if (options.json) {
+            return console.log(JSON.stringify(info));
+        }
+
+        logger.info(info);
+    })
+    .command('restart', 'Restart workers')
+    .help('This command will restart each worker process one at a time giving time to clean up')
+    .argument('<name>', 'Worker name')
+    .action(async function(args, options, logger) {
+
+        const metadata = new Metadata({
+            logger
+        });
+
+        await metadata.load();
+
+        const info = metadata.get(args.name);
+
+        if (!info) {
+            return logger.warn('No worker found with name "%s"', args.name);
+        }
+
+        logger.info('kill', ['-SIGUSR2', info.pid]);
+        spawn('kill', ['-SIGUSR2', info.pid]);
     });
 
-
 prog.parse(process.argv);
+
+
+function getNameFromWorker(worker) {
+    const { basename, extname } = require('path');
+    return basename(worker, extname(worker));
+}
