@@ -33,7 +33,7 @@ module.exports = {
     start(config = {}) {
         if (config.logger) logger = config.logger;
 
-        logger.info('------------- CHILD PROCESS ---------');
+        logger.info('############### CHILD PROCESS ###############');
         logger.info('child %s: start listen on 3999', process.pid);
         server.listen(3999);
     },
