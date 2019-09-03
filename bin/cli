@@ -102,7 +102,7 @@ prog
             return logger.warn('No worker found with name "%s"', args.name);
         }
 
-        logger.info('Restarting worker %s: PID %s', info.name, info.pid);
+        logger.info('Restarting worker "%s": PID %s', info.name, info.pid);
 
         spawn('kill', ['-SIGUSR2', info.pid]);
     });
